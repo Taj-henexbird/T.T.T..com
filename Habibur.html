@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T.T.T.</title> <!-- Updated website title -->
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* Rounded corners */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* Indigo */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* Darker indigo */
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: #e5e7eb; /* Light gray */
+            color: #4b5563; /* Dark gray text */
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db; /* Darker light gray */
+            transform: translateY(-1px);
+        }
+        input, textarea {
+            border: 1px solid #d1d5db; /* Light gray border */
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: border-color 0.2s ease-in-out;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4f46e5; /* Indigo focus border */
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); /* Indigo glow */
+        }
+        /* Custom scrollbar for book list */
+        .book-list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .book-list-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .book-list-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .book-list-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm py-4">
+        <div class="container flex flex-col md:flex-row items-center justify-between">
+            <!-- Replaced h1 with img for logo -->
+            <img src="gojo-satoru.jpg" alt="T.T.T. Logo" class="h-16 w-auto object-contain mb-4 md:mb-0" onerror="this.onerror=null; this.src='https://placehold.co/150x64/E0E0E0/333333?text=T.T.T.%20Logo';">
+            <nav class="flex space-x-4">
+                <button id="showUploadFormBtn" class="btn btn-secondary">Publish Book</button>
+                <button id="showBrowseBooksBtn" class="btn btn-primary">Browse Books</button>
+            </nav>
+            <div id="user-info" class="text-sm text-gray-600 mt-2 md:mt-0"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container py-8">
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-4 rounded-lg flex items-center shadow-lg">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Loading...</span>
+            </div>
+        </div>
+
+        <!-- Publish Book Form -->
+        <section id="publishBookSection" class="card mt-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Publish Your Book</h2>
+            <!-- Copyright Information and Disclaimer -->
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-md" role="alert">
+                <p class="font-bold">Important Copyright Notice</p>
+                <p class="text-sm">By publishing a book, you affirm that you own the copyright or have the necessary rights/permissions to distribute this content. T.T.T. respects intellectual property rights. Users are solely responsible for the content they publish.</p>
+            </div>
+            <form id="bookForm" class="space-y-4">
+                <div>
+                    <label for="bookTitle" class="block text-gray-700 text-sm font-medium mb-2">Book Title</label>
+                    <input type="text" id="bookTitle" placeholder="Enter book title" required>
+                </div>
+                <div>
+                    <label for="bookAuthor" class="block text-gray-700 text-sm font-medium mb-2">Author Name</label>
+                    <input type="text" id="bookAuthor" placeholder="Enter author's name" required>
+                </div>
+                <div>
+                    <label for="bookGenre" class="block text-gray-700 text-sm font-medium mb-2">Genre</label>
+                    <input type="text" id="bookGenre" placeholder="e.g., Fiction, Science, History">
+                </div>
+                <div>
+                    <label for="pdfLink" class="block text-gray-700 text-sm font-medium mb-2">PDF Download Link (Placeholder)</label>
+                    <input type="url" id="pdfLink" placeholder="e.g., https://example.com/your-book.pdf" required>
+                    <p class="text-xs text-gray-500 mt-1">
+                        In a real application, this would be an actual file upload. For this demo, please provide a direct link to a dummy PDF.
+                    </p>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="copyrightConsent" class="mr-2" required>
+                    <label for="copyrightConsent" class="text-gray-700 text-sm">I affirm that I have the right to publish this book and it does not infringe on any copyrights.</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-full md:w-auto">Publish Book</button>
+            </form>
+        </section>
+
+        <!-- Browse and Search Books Section -->
+        <section id="browseBooksSection" class="card mt-8 hidden">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Browse and Search Books</h2>
+            <div class="mb-6">
+                <label for="searchQuery" class="block text-gray-700 text-sm font-medium mb-2">Search by Title or Author</label>
+                <input type="text" id="searchQuery" placeholder="Search for books..." class="w-full">
+            </div>
+            <div id="bookList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 book-list-container max-h-96 overflow-y-auto">
+                <!-- Books will be loaded here -->
+                <div class="text-center text-gray-500 py-4" id="noBooksMessage">No books found. Publish one!</div>
+            </div>
+        </section>
+
+        <!-- Custom Modal for Alerts -->
+        <div id="customModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl text-center">
+                <h3 id="modalTitle" class="text-xl font-bold mb-4 text-gray-800"></h3>
+                <p id="modalMessage" class="text-gray-700 mb-6"></p>
+                <button id="modalCloseBtn" class="btn btn-primary w-full">OK</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4 mt-8">
+        <div class="container text-center text-sm flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-4">
+            <span>&copy; 2025 T.T.T. All rights reserved.</span>
+            <a href="#" class="text-indigo-300 hover:text-indigo-100">Report Copyright Infringement</a>
+            <a href="#" class="text-indigo-300 hover:text-indigo-100">Terms of Service</a>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        // Firebase JS SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase configuration and app ID
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+        let userId = null;
+        let isAuthReady = false; // Flag to indicate if authentication is ready
+
+        // DOM elements
+        const publishBookSection = document.getElementById('publishBookSection');
+        const browseBooksSection = document.getElementById('browseBooksSection');
+        const showUploadFormBtn = document.getElementById('showUploadFormBtn');
+        const showBrowseBooksBtn = document.getElementById('showBrowseBooksBtn');
+        const bookForm = document.getElementById('bookForm');
+        const bookTitleInput = document.getElementById('bookTitle');
+        const bookAuthorInput = document.getElementById('bookAuthor');
+        const bookGenreInput = document.getElementById('bookGenre');
+        const pdfLinkInput = document.getElementById('pdfLink');
+        const copyrightConsentCheckbox = document.getElementById('copyrightConsent'); // Added checkbox
+        const bookListDiv = document.getElementById('bookList');
+        const searchQueryInput = document.getElementById('searchQuery');
+        const noBooksMessage = document.getElementById('noBooksMessage');
+        const userInfoDiv = document.getElementById('user-info');
+        const loadingIndicator = document.getElementById('loading');
+        const customModal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        /**
+         * Shows the custom modal with a title and message.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message content of the modal.
+         */
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            customModal.classList.remove('hidden');
+        }
+
+        // Close modal event listener
+        modalCloseBtn.addEventListener('click', () => {
+            customModal.classList.add('hidden');
+        });
+
+
+        /**
+         * Displays the loading indicator.
+         */
+        function showLoading() {
+            loadingIndicator.classList.remove('hidden');
+        }
+
+        /**
+         * Hides the loading indicator.
+         */
+        function hideLoading() {
+            loadingIndicator.classList.add('hidden');
+        }
+
+        /**
+         * Initializes Firebase and authenticates the user.
+         * Sets up an auth state listener to update the userId and isAuthReady flag.
+         */
+        async function initializeFirebase() {
+            try {
+                showLoading();
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Set up auth state changed listener
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Authenticated with userId:", userId);
+                        userInfoDiv.textContent = `User ID: ${userId}`; // Display userId
+                    } else {
+                        // Sign in anonymously if no user is found or initial token is not provided
+                        // This handles cases where __initial_auth_token might not be set in some environments
+                        if (!initialAuthToken) {
+                            await signInAnonymously(auth);
+                            userId = auth.currentUser?.uid || crypto.randomUUID(); // Fallback if anonymous fails
+                            console.log("Signed in anonymously with userId:", userId);
+                            userInfoDiv.textContent = `User ID: ${userId}`; // Display userId
+                        } else {
+                            // If initialAuthToken is provided but no user, it means sign-in failed or is pending
+                            console.warn("Authentication failed or pending with initial token.");
+                            // If signInWithCustomToken fails, userId might remain null, handle appropriately
+                        }
+                    }
+                    isAuthReady = true; // Auth state is now ready
+                    hideLoading();
+                    // Load books only after authentication is ready
+                    if (userId) {
+                        loadBooks();
+                    }
+                });
+
+                // Attempt to sign in with custom token if available
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Signed in with custom token.");
+                } else {
+                    console.log("No custom auth token provided. Will attempt anonymous sign-in.");
+                }
+
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                showModal("Initialization Error", "Failed to initialize Firebase. Please try again later.");
+                hideLoading();
+            }
+        }
+
+        /**
+         * Renders a single book card.
+         * @param {object} book - The book object to render.
+         * @param {string} book.id - The Firestore document ID.
+         * @param {string} book.title - The title of the book.
+         * @param {string} book.author - The author of the book.
+         * @param {string} book.genre - The genre of the book.
+         * @param {string} book.pdfLink - The URL to the PDF.
+         * @returns {string} - The HTML string for the book card.
+         */
+        function renderBookCard(book) {
+            return `
+                <div class="card flex flex-col justify-between items-start space-y-3">
+                    <h3 class="text-xl font-semibold text-gray-900">${book.title}</h3>
+                    <p class="text-gray-700"><strong>Author:</strong> ${book.author}</p>
+                    <p class="text-gray-600 text-sm"><strong>Genre:</strong> ${book.genre || 'N/A'}</p>
+                    <a href="${book.pdfLink}" target="_blank" rel="noopener noreferrer" class="btn btn-primary w-full text-center">
+                        Download PDF
+                    </a>
+                </div>
+            `;
+        }
+
+        /**
+         * Loads and displays books from Firestore, with real-time updates.
+         * Filters books based on the search query.
+         */
+        function loadBooks() {
+            if (!isAuthReady || !userId) {
+                console.log("Firebase not ready or userId not available yet. Skipping book load.");
+                return;
+            }
+
+            console.log("Loading books for appId:", appId, "userId:", userId);
+            const booksCollectionRef = collection(db, `artifacts/${appId}/public/data/books`);
+
+            // Use onSnapshot for real-time updates
+            onSnapshot(booksCollectionRef, (snapshot) => {
+                const books = [];
+                snapshot.forEach(doc => {
+                    books.push({ id: doc.id, ...doc.data() });
+                });
+
+                const searchQuery = searchQueryInput.value.toLowerCase();
+                const filteredBooks = books.filter(book =>
+                    book.title.toLowerCase().includes(searchQuery) ||
+                    book.author.toLowerCase().includes(searchQuery)
+                );
+
+                bookListDiv.innerHTML = ''; // Clear existing books
+                if (filteredBooks.length === 0) {
+                    noBooksMessage.classList.remove('hidden');
+                } else {
+                    noBooksMessage.classList.add('hidden');
+                    filteredBooks.forEach(book => {
+                        bookListDiv.innerHTML += renderBookCard(book);
+                    });
+                }
+                hideLoading();
+            }, (error) => {
+                console.error("Error fetching books:", error);
+                showModal("Error", "Failed to load books. Please check your connection.");
+                hideLoading();
+            });
+        }
+
+        /**
+         * Handles the submission of the book form.
+         * Adds a new book to Firestore.
+         */
+        bookForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!userId) {
+                showModal("Authentication Required", "Please wait while we set up your session. Try again in a moment.");
+                return;
+            }
+            if (!copyrightConsentCheckbox.checked) { // Check if checkbox is ticked
+                showModal("Copyright Agreement Required", "Please confirm that you have the right to publish this book.");
+                return;
+            }
+            showLoading();
+
+            const title = bookTitleInput.value.trim();
+            const author = bookAuthorInput.value.trim();
+            const genre = bookGenreInput.value.trim();
+            const pdfLink = pdfLinkInput.value.trim();
+
+            if (!title || !author || !pdfLink) {
+                showModal("Missing Information", "Please fill in all required fields (Title, Author, PDF Link).");
+                hideLoading();
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/public/data/books`), {
+                    title: title,
+                    author: author,
+                    genre: genre,
+                    pdfLink: pdfLink,
+                    publishedBy: userId, // Store the ID of the user who published it
+                    timestamp: new Date()
+                });
+
+                showModal("Success", "Book published successfully!");
+                bookForm.reset(); // Clear the form
+                copyrightConsentCheckbox.checked = false; // Uncheck the box after successful submission
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                showModal("Error", "Failed to publish book. Please try again.");
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Event listeners for section switching
+        showUploadFormBtn.addEventListener('click', () => {
+            publishBookSection.classList.remove('hidden');
+            browseBooksSection.classList.add('hidden');
+            showUploadFormBtn.classList.add('btn-primary');
+            showUploadFormBtn.classList.remove('btn-secondary');
+            showBrowseBooksBtn.classList.remove('btn-primary');
+            showBrowseBooksBtn.classList.add('btn-secondary');
+        });
+
+        showBrowseBooksBtn.addEventListener('click', () => {
+            browseBooksSection.classList.remove('hidden');
+            publishBookSection.classList.add('hidden');
+            showBrowseBooksBtn.classList.add('btn-primary');
+            showBrowseBooksBtn.classList.remove('btn-secondary');
+            showUploadFormBtn.classList.remove('btn-primary');
+            showUploadFormBtn.classList.add('btn-secondary');
+            loadBooks(); // Reload books when switching to browse section
+        });
+
+        // Event listener for search input
+        searchQueryInput.addEventListener('input', () => {
+            loadBooks(); // Re-filter books based on search query
+        });
+
+        // Initialize Firebase when the window loads
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>
